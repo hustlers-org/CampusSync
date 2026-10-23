@@ -1,0 +1,29 @@
+{
+  "name": "campusconnect",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CampusConnect - Student campus-issue reporting and resolution platform",
+  "scripts": {
+    "postinstall": "npm --prefix app install && npm --prefix frontend install",
+    "install:all": "npm --prefix app install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build && npm --prefix app run build",
+    "build:app": "npm --prefix app run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:all": "npm --prefix frontend run build && npm --prefix app run build",
+    "start": "npm --prefix app start",
+    "dev": "npm --prefix app run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:ui": "npm --prefix ui run dev",
+    "build:ui": "npm --prefix ui run build",
+    "start:ui": "npm --prefix ui start",
+    "serve:prod": "npm --prefix ui run build && npm --prefix ui start",
+    "deploy:cloudrun": "gcloud run deploy campusconnect --source . --region us-central1 --allow-unauthenticated",
+    "test": "npm --prefix app test",
+    "test:frontend": "npm --prefix frontend test",
+    "test:all": "npm --prefix app test && npm --prefix frontend test",
+    "typecheck": "npm --prefix app run typecheck",
+    "typecheck:frontend": "npm --prefix frontend run typecheck",
+    "typecheck:all": "npm --prefix app run typecheck && npm --prefix frontend run typecheck",
+    "smoke:ai": "npm --prefix app run smoke:ai"
+  }
+}

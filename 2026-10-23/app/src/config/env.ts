@@ -1,0 +1,82 @@
+import dotenv from 'dotenv';
+import { z } from 'zod';
+
+// Load local environment variables if present
+dotenv.config();
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  PORT: z.coerce.number().int().positive().default(8080),
+  GOOGLE_CLOUD_PROJECT: z.string().optional(),
+
+  // Persistent Relational Database (PostgreSQL / Supabase / Cloud SQL)
+  DATABASE_URL: z.string().optional(),
+
+  // Authentication & Security Tokens
+  JWT_SECRET: z.string().default('campusconnect-jwt-default-secret-2026'),
+  AUTH_EMAIL_OTP_SECRET: z.string().default('campusconnect-dev-otp-secret-key-32b'),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+
+  // Development & Testing flags
+  ALLOW_DEV_AUTH: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true'),
+  USE_IN_MEMORY_REPO: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true'),
+
+  // Gemini AI Service
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-3.5-flash-lite'),
+
+  // Email delivery (SMTP)
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true')
+    .default('false'),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  EMAIL_FROM: z.string().default('CampusConnect <noreply@campusconnect.edu>'),
+
+  // Diagnostic harness toggle
+  AUTH_TEST_PAGE_ENABLED: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true')
+    .default('false'),
+
+  // Allowed CORS origins for external frontend clients (comma-separated URLs)
+  CORS_ALLOWED_ORIGINS: z.string().optional(),
+
+  // Legacy compatibility keys (optional)
+  FIREBASE_PROJECT_ID: z.string().optional(),
+  FIREBASE_CLIENT_API_KEY: z.string().optional(),
+  FIREBASE_CLIENT_AUTH_DOMAIN: z.string().optional(),
+  FIREBASE_CLIENT_PROJECT_ID: z.string().optional(),
+  FIREBASE_CLIENT_APP_ID: z.string().optional(),
+  FIREBASE_SERVICE_ACCOUNT_PATH: z.string().optional(),
+});
+
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  console.error('Invalid environment configuration:', parsed.error.format());
+  throw new Error('Environment configuration validation failed');
+}
+
+export const env = parsed.data;
+
+// Security Guardrail: Dev auth and in-memory repo are strictly prohibited in production
+if (env.NODE_ENV === 'production') {
+  if (env.ALLOW_DEV_AUTH) {
+    throw new Error('FATAL: ALLOW_DEV_AUTH is strictly prohibited in production mode');
+  }
+  if (env.USE_IN_MEMORY_REPO) {
+    throw new Error('FATAL: USE_IN_MEMORY_REPO is strictly prohibited in production mode');
+  }
+}
